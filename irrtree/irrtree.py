@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-debug = True
+debug = False
 
+import progressbar
 from Queue import Queue
 import socket
 import sys
@@ -59,12 +60,21 @@ send(connection, "!!")
 
 db = {}
 
+widgets = ['Processed: ', progressbar.Counter(), ' objects (',
+           progressbar.Timer(), ')']
+pbar = progressbar.ProgressBar(widgets=widgets)
+pbar.start()
+counter = 0
+
 while not queue.empty():
     item = queue.get()
-    print "Info: expanding %s" % item
+    if debug:
+        print "Info: expanding %s" % item
     if not "-" in item:  # expand aut-nums
         prefixes = query(connection, "g", item)
         db[item] = prefixes
+        counter += 1
+        pbar.update(counter)
         queue.task_done()
         continue
     db.setdefault(item, {})['members'] = query(connection, "i", item)
@@ -72,6 +82,8 @@ while not queue.empty():
     for candidate in set(db[item]['members'] + db[item]['origin_asns']):
         if not candidate in db and candidate not in queue.queue:
             queue.put(candidate)
+    counter += 1
+    pbar.update(counter)
     queue.task_done()
 
 print db
