@@ -126,12 +126,15 @@ def process(irr_host, afi, db, as_set, search):
         % (irrtree.__version__, as_set, afi, irr_host, now)
 
     if search and "-" not in db.keys():
-        print "NOT_FOUND: %s not present in %s or any of its members" % (search, as_set)
-        sys.exit()
+        if not search in db.keys():
+            print "NOT_FOUND: %s not present in %s or any of its members" % (search, as_set)
+            sys.exit()
 
-    def print_member(as_set, db):
+    def print_member(as_set, db, search):
         if not "-" in as_set:
             res = "%s (%s pfxs)" % (as_set, resolve_prefixes(db, as_set))
+        elif search:
+            res = "%s (%s ASNs)" % (as_set, len(db[as_set]['origin_asns']))
         else:
             res = "%s (%s ASNs, %s pfxs)" % (as_set,
                                              len(db[as_set]['origin_asns']),
@@ -151,20 +154,20 @@ def process(irr_host, afi, db, as_set, search):
         for member in sorted(db[as_set]['members'], key=lambda x:
                              getasncount(db, x), reverse=True):
             if member in seen:
-                tree["%s - already expanded" % print_member(member, db)] = {}
+                tree["%s - already expanded" % print_member(member, db, search)] = {}
                 continue
             if "-" in member:
                 seen.add(member)
-                tree["%s" % print_member(member, db)] = resolve_tree(member, db, OD(), seen)
+                tree["%s" % print_member(member, db, search)] = resolve_tree(member, db, OD(), seen)
             else:
                 if not search or search == member:
-                    tree["%s" % print_member(member, db)] = {}
+                    tree["%s" % print_member(member, db, search)] = {}
                 else:
                     continue
         return tree
 
     tree = OD()
-    tree["%s" % print_member(as_set, db)] = resolve_tree(as_set, db)
+    tree["%s" % print_member(as_set, db, search)] = resolve_tree(as_set, db)
     tr = asciitree.LeftAligned()
     print tr(tree)
 
@@ -253,12 +256,12 @@ def main():
         iter_db = dict(db)
         for item in iter_db:
             if "-" in item:
-                if search not in iter_db[item]['origin_asns']:
+                if not search in db[item]['origin_asns']:
                     del db[item]
                     to_delete.add(item)
         for item in db:
             if "-" in item:
-                db[item]['members'] = set(db[item]['members']) - to_delete
+                db[item]['members'] = db[item]['members'] - to_delete
 
     process(irr_host, afi, db, args[0], search)
 
