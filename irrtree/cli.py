@@ -28,6 +28,7 @@
 import irrtree
 import getopt
 import progressbar
+import re
 import socket
 import sys
 from collections import OrderedDict as OD
@@ -60,22 +61,36 @@ def receive(connection):
 
 
 def query(connection, cmd, as_set, recurse=False):
-    cmd = "!%s%s%s" % (cmd, as_set, ",1" if recurse else "")
-    send(connection, cmd)
+    query = "!%s%s%s" % (cmd, as_set, ",1" if recurse else "")
+    if debug:
+        print "sending: %s" % query
+    send(connection, query)
     answer = receive(connection)
     if answer == "D":
         return list()
     elif answer[0] == "F":
         if debug:
             print "Error: %s" % answer[1:]
-            print "Query was: %s" % cmd
+            print "Query was: %s" % query
     elif answer[0] == "A":
         if debug:
             print "Info: receiving %s bytes" % answer[1:]
-        results = receive(connection).split()
+        unfiltered = receive(connection).split()
+        results = []
+        for result in unfiltered:
+            if cmd == "i":
+                if re.match(r'^[aA][sS]\d+', result):
+                    results.append(result)  # found an autnum
+                elif re.match(r'^[aA][sS]-.*', result):
+                    results.append(result)  # found as-set
+                else:
+                    if debug:
+                        print "Error: object %s contains garbage '%s'" % (item, candidate)
+            else:
+                results = unfiltered
         if not receive(connection) == "C":
-            print "Error: something went wrong with: %s" % cmd
-        return results
+            print "Error: something went wrong with: %s" % query
+        return list(set(results))
 
 
 def usage():
@@ -181,8 +196,9 @@ def main():
 
     widgets = ['Processed: ', progressbar.Counter(), ' objects (',
             progressbar.Timer(), ')']
-    pbar = progressbar.ProgressBar(widgets=widgets)
-    pbar.start()
+    pbar = progressbar.ProgressBar(widgets=widgets, maxval=2**32)
+    if not debug:
+        pbar.start()
     counter = 0
 
     while not queue.empty():

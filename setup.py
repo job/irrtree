@@ -67,6 +67,8 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2.7',
     ],
-    packages=['irrtree'],
+    setup_requires=reqs,
+    install_requires=reqs,
+    packages=find_packages(exclude=['tests', 'tests.*']),
     entry_points={'console_scripts': ['irrtree = irrtree.cli:main']},
 )
