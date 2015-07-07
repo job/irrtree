@@ -134,14 +134,23 @@ def process(irr_host, afi, db, as_set):
                                              resolve_prefixes(db, as_set))
         return res
 
-    def resolve_tree(as_set, db, tree=OD(), seen=[]):
+    def getasncount(db, k):
+        v = db[k]
+        if type(v) == list:
+            ret=(0, len(v))
+        else:
+            ret=(len(v['origin_asns']), resolve_prefixes(db, k))
+        return ret
+
+    def resolve_tree(as_set, db, tree=OD(), seen=set()):
+        seen.add(as_set)
         for member in sorted(db[as_set]['members'], key=lambda x:
-                             len(db[as_set]['origin_asns'])):
+                             getasncount(db, x), reverse=True):
             if member in seen:
                 tree["%s - already expanded" % print_member(member, db)] = {}
                 continue
             if "-" in member:
-                seen.append(member)
+                seen.add(member)
                 tree["%s" % print_member(member, db)] = resolve_tree(member, db, OD(), seen)
             else:
                 tree["%s" % print_member(member, db)] = {}
