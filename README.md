@@ -16,12 +16,29 @@ usage: irrtree [-h host] [-p port] [-d] [ -4 | -6 ] [-s ASXX] <AS-SET>
 
 Written by Job Snijders <job@instituut.net>
 Source: https://github.com/job/irrtree
-(.venv)Vurt:irrtree job$
 ```
 
 **Note:** especially when dealing with large AS-SETs, the latency towards the
 IRRd host has significant impact on this program's execution time. Lower
 latency is beter.
+
+Installation:
+=============
+
+Through pypi:
+
+```
+$ pip install irrtree
+```
+
+From source:
+
+```
+git clone https://github.com/job/irrtree.git
+cd irrtree
+pip install 'pip>1.5' --upgrade
+python setup.py install
+```
 
 Examples
 ========
@@ -42,9 +59,50 @@ AS-COLOCLUE (3 ASNs, 33 pfxs)
 Only display leaves in the `AS2914:AS-EUROPE` structure that relate to `AS15562`:
 
 ```
-$ irrtree -s AS15562 AS-COLOCLUE
-IRRTree (1.0.0) report for 'AS-COLOCLUE' (IPv4), using rr.ntt.net at 2015-07-08 00:25
-AS-COLOCLUE (3 ASNs, 8 pfxs)
- +-- AS-SNIJDERS (2 ASNs, 8 pfxs)
-     +-- AS15562 (8 pfxs)
+$ irrtree -s AS15562 AS2914:AS-EUROPE
+IRRTree (1.0.0) report for 'AS2914:AS-EUROPE' (IPv4), using rr.ntt.net at 2015-07-07 23:02
+AS2914:AS-EUROPE (30098 ASNs)
+ +-- AS-HIBERNIA (10732 ASNs)
+ |   +-- AS-ATRATO (10732 ASNs)
+ |   |   +-- AS-HIBERNIA (10732 ASNs) - already expanded
+ |   +-- AS-INTOUCHPEERS (15 ASNs)
+ |   |   +-- AS-INTOUCH-CS (15 ASNs)
+ |   |   |   +-- AS-INTOUCHPEERS (15 ASNs) - already expanded
+ |   |   +-- AS-SNIJDERS (2 ASNs)
+ |   |       +-- AS15562 (8 pfxs)
+ |   +-- AS-COLOCLUE (3 ASNs)
+ |   |   +-- AS-SNIJDERS (2 ASNs) - already expanded
+ |   +-- AS-CONCEPTS (3 ASNs)
+ |       +-- AS15562 (8 pfxs)
+ +-- AS-KQ (9281 ASNs)
+ |   +-- AS-KPN (9281 ASNs)
+ |       +-- AS-KPNEU (8768 ASNs)
+ |           +-- AS-JOINTTRANSIT (440 ASNs)
+ |           |   +-- AS-CARRIERONE (440 ASNs)
+ |           |       +-- AS-JOINTTRANSIT (440 ASNs) - already expanded
+ |           |       +-- AS-CONCEPTS (3 ASNs) - already expanded
+ |           +-- AS-SOLCON (8 ASNs)
+ |           |   +-- AS-STEFFANN-IPv4 (2 ASNs)
+ |           |       +-- AS15562 (8 pfxs)
+ |           +-- AS-SOLCON6 (3 ASNs)
+ |               +-- AS-STEFFANN-IPv6 (2 ASNs)
+ |               |   +-- AS15562 (8 pfxs)
+ |               +-- AS15562 (8 pfxs)
+ +-- AS-JOINTTRANSIT (440 ASNs) - already expanded
+ +-- AS-EASYNET (365 ASNs)
+ |   +-- AS-EASYNETNL (28 ASNs)
+ |       +-- AS-CONCEPTS (3 ASNs) - already expanded
+ +-- AS-ATOM86 (183 ASNs)
+ |   +-- AS-ATOM86CUST4 (182 ASNs)
+ |   |   +-- AS-CONCEPTS (3 ASNs) - already expanded
+ |   |   +-- AS-COLOCLUE (3 ASNs) - already expanded
+ |   +-- AS-ATOM86CUST6 (153 ASNs)
+ |       +-- AS-CONCEPTS (3 ASNs) - already expanded
+ |       +-- AS-COLOCLUE (3 ASNs) - already expanded
+ +-- AS-SERVERCENTRAL (116 ASNs)
+ |   +-- AS-SERVERCENTRAL-CUSTOMERS (115 ASNs)
+ |       +-- AS-YOUR-GLOBAL-SET (6 ASNs)
+ |           +-- AS-YOUR-CUSTOMERS (4 ASNs)
+ |               +-- AS15562 (8 pfxs)
+ +-- AS-SNIJDERS (2 ASNs) - already expanded
 ```
