@@ -25,8 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import irrtree
-version = irrtree.__version__
+from irrtree import __version__
 
 import codecs
 import os
@@ -44,7 +43,7 @@ with codecs.open(join(here, 'README.md'), encoding='utf-8') as f:
 if sys.argv[-1] == 'publish':
     os.system('python2.7 setup.py sdist upload')
     print("You probably want to also tag the version now:")
-    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("  git tag -a %s -m 'version %s'" % (__version__, __version__))
     print("  git push --tags")
     sys.exit()
 
@@ -53,7 +52,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='irrtree',
-    version=version,
+    version=__version__,
     maintainer="Job Snijders",
     maintainer_email='job@instituut.net',
     url='https://github.com/job/irrtree',
@@ -68,5 +67,6 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2.7',
     ],
+    packages=['irrtree'],
     entry_points={'console_scripts': ['irrtree = irrtree.cli:main']},
 )

@@ -28,15 +28,17 @@
 import irrtree
 import getopt
 import progressbar
-from Queue import Queue
 import socket
 import sys
+from collections import OrderedDict as OD
+from Queue import Queue
 
 try:
     import asciitree
 except ImportError:
     print "ERROR: install asciitree: pip install asciitree"
     sys.exit(1)
+
 
 def connect(irr_host, irr_port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -45,14 +47,17 @@ def connect(irr_host, irr_port):
     sock_out = sock.makefile('w')
     return sock, sock_in, sock_out
 
+
 def send(connection, command):
     sock, sock_in, sock_out = connection
     sock_out.write(command + '\r\n')
     sock_out.flush()
 
+
 def receive(connection):
     sock, sock_in, sock_out = connection
     return sock_in.readline()[:-1]
+
 
 def query(connection, cmd, as_set, recurse=False):
     cmd = "!%s%s%s" % (cmd, as_set, ",1" if recurse else "")
@@ -75,13 +80,63 @@ def query(connection, cmd, as_set, recurse=False):
 
 def usage():
     print "IRRtool v%s" % irrtree.__version__
-    print "usage: irrtree [-h host] [-p port] [-d] [ -4 | -6 ] <AS-SET> [ AS-SET ... ]"
+    print "usage: irrtree [-h host] [-p port] [-d] [ -4 | -6 ] <AS-SET>"
     print "   -d,--debug       print debug information"
     print "   -4,--ipv4        resolve IPv4 prefixes (default)"
     print "   -6,--ipv6        resolve IPv6 prefixes"
     print "   -p,--port=port   port on which IRRd runs (default: 43)"
     print "   -h,--host=host   hostname to connect to (default: rr.ntt.net)"
+    print ""
+    print "Written by Job Snijders <job@instituut.net>"
+    print "Source: https://github.com/job/irrtree"
     sys.exit()
+
+
+def resolve_prefixes(db, item):
+    all_prefixes = []
+    if "-" not in item:
+        return len(db[item])
+    for origin in db[item]['origin_asns']:
+        all_prefixes.extend(db[origin])
+    return len(set(all_prefixes))
+
+
+def process(irr_host, afi, db, as_set):
+    import datetime
+    now = datetime.datetime.now()
+    now = now.strftime("%Y-%m-%d %H:%M")
+    print "IRRTree (%s) report for '%s' (IPv%i), using %s at %s" \
+        % (irrtree.__version__, as_set, afi, irr_host, now)
+    print "start: %s (%s ASNs, %s pfxs)" % (as_set,
+                                            len(db[as_set]['origin_asns']),
+                                            resolve_prefixes(db, as_set))
+    def print_member(as_set, db):
+        if not "-" in as_set:
+            res = "%s (%s pfxs)" % (as_set, resolve_prefixes(db, as_set))
+        else:
+            res = "%s (%s ASNs, %s pfxs)" % (as_set,
+                                             len(db[as_set]['origin_asns']),
+                                             resolve_prefixes(db, as_set))
+        return res
+
+    def resolve_tree(as_set, db, tree=OD(), seen=[]):
+        for member in sorted(db[as_set]['members'], key=lambda x:
+                             len(db[as_set]['origin_asns'])):
+            if member in seen:
+                tree["%s - already expanded" % print_member(member, db)] = {}
+                continue
+            if "-" in member:
+                seen.append(member)
+                tree["%s" % print_member(member, db)] = resolve_tree(member, db, OD(), seen)
+            else:
+                tree["%s" % print_member(member, db)] = {}
+        return tree
+
+    tree = OD()
+    tree["%s" % print_member(as_set, db)]= resolve_tree(as_set, db)
+    tr = asciitree.LeftAligned()
+    print tr(tree)
+
 
 def main():
 
@@ -110,12 +165,14 @@ def main():
         elif o in ("-p", "--port"):
             irr_port = int(a)
 
-    if not args:
+    if not len(args) == 1:
+        usage()
+    if not "-" in args[0]:
+        print "Error: %s does not appear to be an AS-SET" % args[0]
         usage()
 
     queue = Queue()
-    for arg in args:
-        queue.put(arg)
+    queue.put(args[0])
 
     connection = connect(irr_host, irr_port)
     send(connection, "!!")
@@ -134,9 +191,10 @@ def main():
             print "Info: expanding %s" % item
         if not "-" in item:  # expand aut-nums
             prefixes = query(connection, "g" if afi == 4 else "6", item)
-            db[item] = len(prefixes)
+            db[item] = prefixes
             counter += 1
-            pbar.update(counter)
+            if not debug:
+                pbar.update(counter)
             queue.task_done()
             continue
         db.setdefault(item, {})['members'] = query(connection, "i", item)
@@ -145,12 +203,14 @@ def main():
             if not candidate in db and candidate not in queue.queue:
                 queue.put(candidate)
         counter += 1
-        pbar.update(counter)
+        if not debug:
+            pbar.update(counter)
         queue.task_done()
 
     connection[0].close()
 
-    print db
+    process(irr_host, afi, db, args[0])
+
 
 if __name__ == "__main__":
     main()
