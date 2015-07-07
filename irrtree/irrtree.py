@@ -64,7 +64,7 @@ while not queue.empty():
     print "Info: expanding %s" % item
     if not "-" in item:  # expand aut-nums
         prefixes = query(connection, "g", item)
-        db[as_set] = prefixes
+        db[item] = prefixes
         queue.task_done()
         continue
     db.setdefault(item, {})['members'] = query(connection, "i", item)
@@ -73,3 +73,5 @@ while not queue.empty():
         if not candidate in db and candidate not in queue.queue:
             queue.put(candidate)
     queue.task_done()
+
+print db
