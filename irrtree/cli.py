@@ -51,6 +51,8 @@ def connect(irr_host, irr_port):
 
 def send(connection, command):
     sock, sock_in, sock_out = connection
+    if debug:
+        print "sending: %s" % command
     sock_out.write(command + '\r\n')
     sock_out.flush()
 
@@ -96,12 +98,13 @@ def query(connection, cmd, as_set, recurse=False, search=False):
 
 def usage():
     print "IRRtool v%s" % irrtree.__version__
-    print "usage: irrtree [-h host] [-p port] [-d] [ -4 | -6 ] [-s ASXX] <AS-SET>"
+    print "usage: irrtree [-h host] [-p port] [-l sources] [-d] [-4 | -6] [-s ASXX] <AS-SET>"
     print "   -d,--debug          print debug information"
     print "   -4,--ipv4           resolve IPv4 prefixes (default)"
     print "   -6,--ipv6           resolve IPv6 prefixes"
-    print "   -p,--port=port      port on which IRRd runs (default: 43)"
-    print "   -h,--host=host      hostname to connect to (default: rr.ntt.net)"
+    print "   -l,--list=SOURCES   list of sources (e.g.: RIPE,NTTCOM,RADB)"
+    print "   -p,--port=PORT      port on which IRRd runs (default: 43)"
+    print "   -h,--host=HOST      hostname to connect to (default: rr.ntt.net)"
     print "   -s,--search=AUTNUM  output only related to autnum (in ASXXX format)"
     print ""
     print "Written by Job Snijders <job@instituut.net>"
@@ -181,11 +184,12 @@ def main():
     irr_port = 43
     afi = 4
     search = False
+    sources_list = False
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h:dp:64s:", ["host=", "debug",
-                                                             "port=", "ipv6",
-                                                             "ipv4", "search="])
+        opts, args = getopt.getopt(sys.argv[1:], "h:dp:64s:l:",
+                                   ["host=", "debug", "port=", "ipv6", "ipv4",
+                                    "search=", "list="])
     except getopt.GetoptError as err:
         print str(err)
         usage()
@@ -201,6 +205,8 @@ def main():
             irr_port = int(a)
         elif o in ("-s", "--search"):
             search = a
+        elif o in ("-l", "--list"):
+            sources_list = a
 
     if not len(args) == 1:
         usage()
@@ -213,6 +219,12 @@ def main():
 
     connection = connect(irr_host, irr_port)
     send(connection, "!!")
+    if sources_list:
+        send(connection, "!s%s" % sources_list)
+        answer = receive(connection)
+        if answer is not "C":
+            print "Error: %s" % answer
+            sys.exit(2)
 
     db = {}
 
