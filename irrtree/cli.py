@@ -80,9 +80,9 @@ def query(connection, cmd, as_set, recurse=False, search=False):
         if cmd == "i":
             for result in unfiltered:
                 if re.match(r'^[aA][sS]\d+', result):
-                    results.add(result)  # found an autnum
+                    results.add(result.upper())  # found an autnum
                 elif re.match(r'^[aA][sS]-.*', result):
-                    results.add(result)  # found as-set
+                    results.add(result.upper())  # found as-set
                 else:
                     if debug:
                         print "Warning: not honoring mbrs-by-ref for object %s with '%s'" % (as_set, result)
@@ -211,9 +211,10 @@ def main():
     if not "-" in args[0]:
         print "Error: %s does not appear to be an AS-SET" % args[0]
         usage()
+    query_object = args[0].upper()
 
     queue = Queue()
-    queue.put(args[0])
+    queue.put(query_object)
 
     connection = connect(irr_host, irr_port)
     send(connection, "!!")
@@ -274,7 +275,7 @@ def main():
             if "-" in item:
                 db[item]['members'] = db[item]['members'] - to_delete
 
-    process(irr_host, afi, db, args[0], search)
+    process(irr_host, afi, db, query_object, search)
 
 
 if __name__ == "__main__":
