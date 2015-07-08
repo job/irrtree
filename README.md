@@ -20,7 +20,7 @@ Source: https://github.com/job/irrtree
 
 **Note:** especially when dealing with large AS-SETs, the latency towards the
 IRRd host has significant impact on this program's execution time. Lower
-latency is beter.
+latency is better.
 
 Installation:
 =============
