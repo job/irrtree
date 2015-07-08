@@ -87,7 +87,7 @@ def query(connection, cmd, as_set, recurse=False, search=False):
                     results.add(result)  # found as-set
                 else:
                     if debug:
-                        print "Error: object %s contains garbage '%s'" % (item, candidate)
+                        print "Error: object %s contains garbage '%s'" % (as_set, result)
         else:
             results = unfiltered
 
