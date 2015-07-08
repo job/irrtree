@@ -5,13 +5,14 @@ Simple tool to quickly assess potential resource consumption of an AS-SET.
 
 ```
 job$ irrtree
-IRRtool v1.0.0
-usage: irrtree [-h host] [-p port] [-d] [ -4 | -6 ] [-s ASXX] <AS-SET>
+IRRtool v1.1.0
+usage: irrtree [-h host] [-p port] [-l sources] [-d] [-4 | -6] [-s ASXX] <AS-SET>
    -d,--debug          print debug information
    -4,--ipv4           resolve IPv4 prefixes (default)
    -6,--ipv6           resolve IPv6 prefixes
-   -p,--port=port      port on which IRRd runs (default: 43)
-   -h,--host=host      hostname to connect to (default: rr.ntt.net)
+   -l,--list=SOURCES   list of sources (e.g.: RIPE,NTTCOM,RADB)
+   -p,--port=PORT      port on which IRRd runs (default: 43)
+   -h,--host=HOST      hostname to connect to (default: rr.ntt.net)
    -s,--search=AUTNUM  output only related to autnum (in ASXXX format)
 
 Written by Job Snijders <job@instituut.net>
