@@ -64,8 +64,6 @@ def receive(connection):
 
 def query(connection, cmd, as_set, recurse=False, search=False):
     query = "!%s%s%s" % (cmd, as_set, ",1" if recurse else "")
-    if debug:
-        print "sending: %s" % query
     send(connection, query)
     answer = receive(connection)
     if answer == "D":
