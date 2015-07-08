@@ -261,6 +261,7 @@ def main():
             pbar.update(counter)
         queue.task_done()
 
+    send(connection, '!q')
     connection[0].close()
 
     if search:
