@@ -25,7 +25,9 @@ latency is better.
 Installation:
 =============
 
-Through pypi:
+**irrtree requires python 2.7**
+
+Through pypi (try `pip install --upgrade pip` if you get errors):
 
 ```
 $ pip install irrtree
