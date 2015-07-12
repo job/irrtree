@@ -202,7 +202,7 @@ def main():
         elif o in ("-p", "--port"):
             irr_port = int(a)
         elif o in ("-s", "--search"):
-            search = a
+            search = a.upper()
         elif o in ("-l", "--list"):
             sources_list = a
 
