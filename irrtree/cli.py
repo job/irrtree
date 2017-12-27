@@ -25,20 +25,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import irrtree
+from __future__ import print_function
+from collections import OrderedDict as OD
+from Queue import Queue
+
+import asciitree
 import getopt
+import irrtree
 import progressbar
 import re
 import socket
 import sys
-from collections import OrderedDict as OD
-from Queue import Queue
-
-try:
-    import asciitree
-except ImportError:
-    print "ERROR: install asciitree: pip install asciitree"
-    sys.exit(1)
 
 
 def connect(irr_host, irr_port):
