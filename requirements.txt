@@ -1,2 +1,2 @@
-asciitree==0.3
-progressbar2==3.30.2
+asciitree==0.3.3
+progressbar2==3.34.3

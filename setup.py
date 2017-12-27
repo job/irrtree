@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2015 Job Snijders <job@instituut.net>
+# Copyright (C) 2015-2018 Job Snijders <job@instituut.net>
 #
 # This file is part of IRRTree
 #
@@ -31,10 +31,6 @@ import codecs
 import os
 import sys
 
-if not sys.version_info[0] >= 2 and not sys.version_info[1] >= 7:
-    print "ERROR for irrtree: Sorry, only python 2.7 or higher are supported"
-    sys.exit(1)
-
 from pip.req import parse_requirements
 from setuptools import setup, find_packages
 from os.path import abspath, dirname, join
@@ -45,7 +41,7 @@ with codecs.open(join(here, 'README.md'), encoding='utf-8') as f:
     README = f.read()
 
 if sys.argv[-1] == 'publish':
-    os.system('python2.7 setup.py sdist upload')
+    os.system('python setup.py sdist upload')
     print("You probably want to also tag the version now:")
     print("  git tag -a %s -m 'version %s'" % (__version__, __version__))
     print("  git push --tags")
@@ -70,6 +66,8 @@ setup(
         'Topic :: System :: Networking',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
     ],
     setup_requires=reqs,
     install_requires=reqs,
