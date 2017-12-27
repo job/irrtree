@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2015 Job Snijders <job@instituut.net>
+# Copyright (C) 2015-2018 Job Snijders <job@instituut.net>
 #
 # This file is part of IRRTree
 #
