@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (C) 2015-2018 Job Snijders <job@instituut.net>
 #
 # This file is part of IRRTree
@@ -25,9 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import print_function
 from collections import OrderedDict as OD
-from Queue import Queue
+from queue import Queue
 
 import asciitree
 import getopt
@@ -49,7 +48,7 @@ def connect(irr_host, irr_port):
 def send(connection, command):
     sock, sock_in, sock_out = connection
     if debug:
-        print "sending: %s" % command
+        print("sending: %s" % command)
     sock_out.write(command + '\r\n')
     sock_out.flush()
 
@@ -67,11 +66,11 @@ def query(connection, cmd, as_set, recurse=False, search=False):
         return set()
     elif answer[0] == "F":
         if debug:
-            print "Error: %s" % answer[1:]
-            print "Query was: %s" % query
+            print("Error: %s" % answer[1:])
+            print("Query was: %s" % query)
     elif answer[0] == "A":
         if debug:
-            print "Info: receiving %s bytes" % answer[1:]
+            print("Info: receiving %s bytes" % answer[1:])
         unfiltered = receive(connection).split()
         results = set()
         if cmd == "i":
@@ -82,28 +81,28 @@ def query(connection, cmd, as_set, recurse=False, search=False):
                     results.add(result.upper())  # found as-set
                 else:
                     if debug:
-                        print "Warning: not honoring mbrs-by-ref for object %s with '%s'" % (as_set, result)
+                        print("Warning: not honoring mbrs-by-ref for object %s with '%s'" % (as_set, result))
         else:
             results = unfiltered
 
         if not receive(connection) == "C":
-            print "Error: something went wrong with: %s" % query
+            print("Error: something went wrong with: %s" % query)
 
         return set(results)
 
 def usage():
-    print "IRRtool v%s" % irrtree.__version__
-    print "usage: irrtree [-h host] [-p port] [-l sources] [-d] [-4 | -6] [-s ASXX] <AS-SET>"
-    print "   -d,--debug          print debug information"
-    print "   -4,--ipv4           resolve IPv4 prefixes (default)"
-    print "   -6,--ipv6           resolve IPv6 prefixes"
-    print "   -l,--list=SOURCES   list of sources (e.g.: RIPE,NTTCOM,RADB)"
-    print "   -p,--port=PORT      port on which IRRd runs (default: 43)"
-    print "   -h,--host=HOST      hostname to connect to (default: rr.ntt.net)"
-    print "   -s,--search=AUTNUM  output only related to autnum (in ASXXX format)"
-    print ""
-    print "Written by Job Snijders <job@instituut.net>"
-    print "Source: https://github.com/job/irrtree"
+    print("IRRtool v%s" % irrtree.__version__)
+    print("usage: irrtree [-h host] [-p port] [-l sources] [-d] [-4 | -6] [-s ASXX] <AS-SET>")
+    print("   -d,--debug          print debug information")
+    print("   -4,--ipv4           resolve IPv4 prefixes (default)")
+    print("   -6,--ipv6           resolve IPv6 prefixes")
+    print("   -l,--list=SOURCES   list of sources (e.g.: RIPE,NTTCOM,RADB)")
+    print("   -p,--port=PORT      port on which IRRd runs (default: 43)")
+    print("   -h,--host=HOST      hostname to connect to (default: rr.ntt.net)")
+    print("   -s,--search=AUTNUM  output only related to autnum (in ASXXX format)")
+    print("")
+    print("Written by Job Snijders <job@instituut.net>")
+    print("Source: https://github.com/job/irrtree")
     sys.exit()
 
 
@@ -120,12 +119,12 @@ def process(irr_host, afi, db, as_set, search):
     import datetime
     now = datetime.datetime.now()
     now = now.strftime("%Y-%m-%d %H:%M")
-    print "IRRTree (%s) report for '%s' (IPv%i), using %s at %s" \
-        % (irrtree.__version__, as_set, afi, irr_host, now)
+    print("IRRTree (%s) report for '%s' (IPv%i), using %s at %s" \
+        % (irrtree.__version__, as_set, afi, irr_host, now))
 
-    if search and "-" not in db.keys():
-        if not search in db.keys():
-            print "NOT_FOUND: %s not present in %s or any of its members" % (search, as_set)
+    if search and "-" not in list(db.keys()):
+        if not search in list(db.keys()):
+            print("NOT_FOUND: %s not present in %s or any of its members" % (search, as_set))
             sys.exit()
 
     def print_member(as_set, db, search):
@@ -167,7 +166,7 @@ def process(irr_host, afi, db, as_set, search):
     tree = OD()
     tree["%s" % print_member(as_set, db, search)] = resolve_tree(as_set, db)
     tr = asciitree.LeftAligned()
-    print tr(tree)
+    print(tr(tree))
 
 
 def main():
@@ -186,7 +185,7 @@ def main():
                                    ["host=", "debug", "port=", "ipv6", "ipv4",
                                     "search=", "list="])
     except getopt.GetoptError as err:
-        print str(err)
+        print(str(err))
         usage()
 
     for o, a in opts:
@@ -206,7 +205,7 @@ def main():
     if not len(args) == 1:
         usage()
     if not "-" in args[0]:
-        print "Error: %s does not appear to be an AS-SET" % args[0]
+        print("Error: %s does not appear to be an AS-SET" % args[0])
         usage()
     query_object = args[0].upper()
 
@@ -219,7 +218,7 @@ def main():
         send(connection, "!s%s" % sources_list)
         answer = receive(connection)
         if answer is not "C":
-            print "Error: %s" % answer
+            print("Error: %s" % answer)
             sys.exit(2)
 
     db = {}
@@ -234,7 +233,7 @@ def main():
     while not queue.empty():
         item = queue.get()
         if debug:
-            print "Info: expanding %s" % item
+            print("Info: expanding %s" % item)
         if not "-" in item:  # expand aut-nums
             if not search or search == item:
                 prefixes = query(connection, "g" if afi == 4 else "6", item, False, False)

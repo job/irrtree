@@ -5,7 +5,7 @@ Simple tool to quickly assess potential resource consumption of an AS-SET.
 
 ```
 job$ irrtree
-IRRtool v1.1.0
+IRRtool v1.2.0
 usage: irrtree [-h host] [-p port] [-l sources] [-d] [-4 | -6] [-s ASXX] <AS-SET>
    -d,--debug          print debug information
    -4,--ipv4           resolve IPv4 prefixes (default)
@@ -26,12 +26,12 @@ latency is better.
 Installation:
 =============
 
-**irrtree requires python 2.7**
+**irrtree requires python 3**
 
 Through pypi (try `pip install --upgrade pip` if you get errors):
 
 ```
-$ pip install irrtree
+$ pip3 install irrtree
 ```
 
 From source:
@@ -39,8 +39,7 @@ From source:
 ```
 git clone https://github.com/job/irrtree.git
 cd irrtree
-pip install 'pip>1.5' --upgrade
-python setup.py install
+python3 setup.py install
 ```
 
 Examples
