@@ -31,7 +31,6 @@ import codecs
 import os
 import sys
 
-from pip.req import parse_requirements
 from setuptools import setup, find_packages
 from os.path import abspath, dirname, join
 
@@ -47,8 +46,7 @@ if sys.argv[-1] == 'publish':
     print("  git push --tags")
     sys.exit()
 
-install_reqs = parse_requirements('requirements.txt', session="")
-reqs = [str(ir.req) for ir in install_reqs]
+reqs = ['asciitree==0.3.3', 'progressbar2==3.34.3']
 
 setup(
     name='irrtree',
