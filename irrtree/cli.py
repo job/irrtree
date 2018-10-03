@@ -31,6 +31,7 @@ import progressbar
 import re
 import socket
 import sys
+import datetime
 from collections import OrderedDict as OD
 from six.moves.queue import Queue
 
@@ -99,6 +100,7 @@ def usage():
     print("IRRtool v%s" % irrtree.__version__)
     print("usage: irrtree [-h host] [-p port] [-l sources] [-d] [-4 | -6] [-s ASXX] <AS-SET>")
     print("   -d,--debug          print debug information")
+    print("   -x,--show-prefixes  expand prefixes per AS")
     print("   -4,--ipv4           resolve IPv4 prefixes (default)")
     print("   -6,--ipv6           resolve IPv6 prefixes")
     print("   -l,--list=SOURCES   list of sources (e.g.: RIPE,NTTCOM,RADB)")
@@ -114,14 +116,13 @@ def usage():
 def resolve_prefixes(db, item):
     all_prefixes = set()
     if "-" not in item:
-        return len(db[item])
+        return db[item]
     for origin in db[item]['origin_asns']:
         all_prefixes |= db[origin]
-    return len(all_prefixes)
+    return all_prefixes
 
 
-def process(irr_host, afi, db, as_set, search):
-    import datetime
+def process(irr_host, afi, db, as_set, search, show_prefixes):
     now = datetime.datetime.now()
     now = now.strftime("%Y-%m-%d %H:%M")
     print("IRRTree (%s) report for '%s' (IPv%i), using %s at %s" % (
@@ -135,13 +136,13 @@ def process(irr_host, afi, db, as_set, search):
 
     def print_member(as_set, db, search):
         if not "-" in as_set:
-            res = "%s (%s pfxs)" % (as_set, resolve_prefixes(db, as_set))
+            res = "%s (%s pfxs)" % (as_set, len(resolve_prefixes(db, as_set)))
         elif search:
             res = "%s (%s ASNs)" % (as_set, len(db[as_set]['origin_asns']))
         else:
             res = "%s (%s ASNs, %s pfxs)" % (as_set,
                                              len(db[as_set]['origin_asns']),
-                                             resolve_prefixes(db, as_set))
+                                             len(resolve_prefixes(db, as_set)))
         return res
 
     def getasncount(db, item):
@@ -154,8 +155,7 @@ def process(irr_host, afi, db, as_set, search):
 
     def resolve_tree(as_set, db, tree=OD(), seen=set()):
         seen.add(as_set)
-        for member in sorted(db[as_set]['members'], key=lambda x:
-                             getasncount(db, x), reverse=True):
+        for member in sorted(db[as_set]['members'], key=lambda x: getasncount(db, x), reverse=True):
             if member in seen:
                 tree["%s - already expanded" % print_member(member, db, search)] = {}
                 continue
@@ -164,7 +164,11 @@ def process(irr_host, afi, db, as_set, search):
                 tree["%s" % print_member(member, db, search)] = resolve_tree(member, db, OD(), seen)
             else:
                 if not search or search == member:
-                    tree["%s" % print_member(member, db, search)] = {}
+                    if show_prefixes and '-' not in member:
+                        subtree = dict((pfx, {}) for pfx in resolve_prefixes(db, member))
+                    else:
+                        subtree = {}
+                    tree["%s" % print_member(member, db, search)] = subtree
                 else:
                     continue
         return tree
@@ -185,10 +189,11 @@ def main():
     afi = 4
     search = False
     sources_list = False
+    show_prefixes = False
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h:dp:64s:l:",
-                                   ["host=", "debug", "port=", "ipv6", "ipv4",
+        opts, args = getopt.getopt(sys.argv[1:], "h:dxp:64s:l:",
+                                   ["host=", "debug", "show-prefixes", "port=", "ipv6", "ipv4",
                                     "search=", "list="])
     except getopt.GetoptError as err:
         print(str(err))
@@ -197,6 +202,8 @@ def main():
     for o, a in opts:
         if o == "-d":
             debug = True
+        elif o in ("-x", "--show-prefixes"):
+            show_prefixes = True
         elif o in ("-h", "--host"):
             irr_host = a
         elif o in ("-6", "--ipv6"):
@@ -250,8 +257,7 @@ def main():
                 pbar.update(counter)
             queue.task_done()
             continue
-        db.setdefault(item, {})['members'] = query(connection, "i", item,
-                                                   False, False)
+        db.setdefault(item, {})['members'] = query(connection, "i", item, False, False)
         db[item]['origin_asns'] = query(connection, "i", item, True, False)
         for candidate in db[item]['members'] | db[item]['origin_asns']:
             if not candidate in db and candidate not in queue.queue:
@@ -276,7 +282,7 @@ def main():
             if "-" in item:
                 db[item]['members'] = db[item]['members'] - to_delete
 
-    process(irr_host, afi, db, query_object, search)
+    process(irr_host, afi, db, query_object, search, show_prefixes)
 
 
 if __name__ == "__main__":
