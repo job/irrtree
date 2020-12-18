@@ -35,7 +35,6 @@ if not sys.version_info[0] >= 2 and not sys.version_info[1] >= 7:
     print("ERROR for irrtree: Sorry, only python 2.7 or higher are supported")
     sys.exit(1)
 
-from pip.req import parse_requirements
 from setuptools import setup, find_packages
 from os.path import abspath, dirname, join
 
@@ -50,9 +49,6 @@ if sys.argv[-1] == 'publish':
     print("  git tag -a %s -m 'version %s'" % (__version__, __version__))
     print("  git push --tags")
     sys.exit()
-
-install_reqs = parse_requirements('requirements.txt', session="")
-reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='irrtree',
@@ -71,8 +67,8 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 2.7',
     ],
-    setup_requires=reqs,
-    install_requires=reqs,
+    install_requires=['asciitree==0.3', 'progressbar2==3.30.2'],
+    setup_requires=['asciitree==0.3', 'progressbar2==3.30.2'],
     packages=find_packages(exclude=['tests', 'tests.*']),
     entry_points={'console_scripts': ['irrtree = irrtree.cli:main']},
 )
