@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (C) 2015 Job Snijders <job@instituut.net>
 #
 # This file is part of IRRTree
