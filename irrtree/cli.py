@@ -277,6 +277,93 @@ def main():
 
     process(irr_host, afi, db, query_object, search)
 
+  
+ def main_export(*data):
+
+    global debug
+    debug = False
+
+    irr_host = 'rr.ntt.net'
+    irr_port = 43
+    afi = 4
+    search = False
+    sources_list = False
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h:dp:64s:l:",
+                                   ["host=", "debug", "port=", "ipv6", "ipv4",
+                                    "search=", "list="])
+    except getopt.GetoptError as err:
+        print(str(err))
+        usage()
+
+    if data:
+        args = [data[0]]
+
+    for o, a in opts:
+        if o == "-d":
+            debug = True
+        elif o in ("-h", "--host"):
+            irr_host = a
+        elif o in ("-6", "--ipv6"):
+            afi = 6
+        elif o in ("-p", "--port"):
+            irr_port = int(a)
+        elif o in ("-s", "--search"):
+            search = a.upper()
+        elif o in ("-l", "--list"):
+            sources_list = a
+
+    if not len(args) == 1:
+        usage()
+    if not "-" in args[0]:
+        print("Error: %s does not appear to be an AS-SET" % args[0])
+        usage()
+    query_object = args[0].upper()
+
+    queue = Queue()
+    queue.put(query_object)
+
+    connection = connect(irr_host, irr_port)
+    send(connection, "!!")
+    if sources_list:
+        send(connection, "!s%s" % sources_list)
+        answer = receive(connection)
+        if answer is not "C":
+            print("Error: %s" % answer)
+            sys.exit(2)
+
+    db = {}
+    counter = 0
+
+    while not queue.empty():
+        item = queue.get()
+        if debug:
+            print("Info: expanding %s" % item)
+        db.setdefault(item, {})['members'] = query(connection, "i", item, False, False)
+        db[item]['origin_asns'] = query(connection, "i", item, True, False)
+        for candidate in db[item]['members'] | db[item]['origin_asns']:
+            if not candidate in db and candidate not in queue.queue:
+                queue.put(candidate)
+        counter += 1
+        queue.task_done()
+
+    send(connection, '!q')
+    connection[0].close()
+
+    if search:
+        to_delete = set()
+        iter_db = dict(db)
+        for item in iter_db:
+            if "-" in item:
+                if not search in db[item]['origin_asns']:
+                    del db[item]
+                    to_delete.add(item)
+        for item in db:
+            if "-" in item:
+                db[item]['members'] = db[item]['members'] - to_delete
+    
+    return(db)
 
 if __name__ == "__main__":
     main()
