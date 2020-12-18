@@ -219,7 +219,7 @@ def main():
     if server.sources_list:
         send(connection, "!s%s" % server.sources_list)
         answer = receive(connection)
-        if answer is not "C":
+        if answer != "C":
             print("Error: %s" % answer)
             sys.exit(2)
 
@@ -298,7 +298,7 @@ def export(*data):
     if server.sources_list:
         send(connection, "!s%s" % server.sources_list)
         answer = receive(connection)
-        if answer is not "C":
+        if answer != "C":
             print("Error: %s" % answer)
             sys.exit(2)
 
