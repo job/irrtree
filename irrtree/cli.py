@@ -132,12 +132,12 @@ def process(irr_host, afi, db, as_set, search):
           % (irrtree.__version__, as_set, afi, irr_host, now))
 
     if search and "-" not in list(db.keys()):
-        if not search in list(db.keys()):
+        if search not in list(db.keys()):
             print("NOT_FOUND: %s not present in %s or any of its members" % (search, as_set))
             sys.exit()
 
     def print_member(as_set, db, search):
-        if not "-" in as_set:
+        if "-" not in as_set:
             res = "%s (%s pfxs)" % (as_set, resolve_prefixes(db, as_set))
         elif search:
             res = "%s (%s ASNs)" % (as_set, len(db[as_set]['origin_asns']))
@@ -206,7 +206,7 @@ def main():
 
     if not len(args) == 1:
         usage()
-    if not "-" in args[0]:
+    if "-" not in args[0]:
         print("Error: %s does not appear to be an AS-SET" % args[0])
         usage()
     query_object = args[0].upper()
@@ -235,7 +235,7 @@ def main():
         item = queue.get()
         if debug:
             print("Info: expanding %s" % item)
-        if not "-" in item:  # expand aut-nums
+        if "-" not in item:  # expand aut-nums
             if not server.search or server.search == item:
                 prefixes = query(connection, "g" if server.afi == 4 else "6", item, False, False)
             else:
@@ -250,7 +250,7 @@ def main():
                                                    False, False)
         db[item]['origin_asns'] = query(connection, "i", item, True, False)
         for candidate in db[item]['members'] | db[item]['origin_asns']:
-            if not candidate in db and candidate not in queue.queue:
+            if candidate not in db and candidate not in queue.queue:
                 queue.put(candidate)
         counter += 1
         if not debug:
@@ -265,7 +265,7 @@ def main():
         iter_db = dict(db)
         for item in iter_db:
             if "-" in item:
-                if not server.search in db[item]['origin_asns']:
+                if server.search not in db[item]['origin_asns']:
                     del db[item]
                     to_delete.add(item)
         for item in db:
@@ -285,7 +285,7 @@ def export(*data):
 
     if not len(args) == 1:
         usage()
-    if not "-" in args[0]:
+    if "-" not in args[0]:
         print("Error: %s does not appear to be an AS-SET" % args[0])
         usage()
     query_object = args[0].upper()
@@ -312,7 +312,7 @@ def export(*data):
         db.setdefault(item, {})['members'] = query(connection, "i", item, False, False)
         db[item]['origin_asns'] = query(connection, "i", item, True, False)
         for candidate in db[item]['members'] | db[item]['origin_asns']:
-            if not candidate in db and candidate not in queue.queue:
+            if candidate not in db and candidate not in queue.queue:
                 queue.put(candidate)
         counter += 1
         queue.task_done()
@@ -325,7 +325,7 @@ def export(*data):
         iter_db = dict(db)
         for item in iter_db:
             if "-" in item:
-                if not server.search in db[item]['origin_asns']:
+                if server.search not in db[item]['origin_asns']:
                     del db[item]
                     to_delete.add(item)
         for item in db:
