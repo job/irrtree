@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (C) 2015 Job Snijders <job@instituut.net>
 #
 # This file is part of IRRTree
@@ -32,7 +32,7 @@ import os
 import sys
 
 if not sys.version_info[0] >= 2 and not sys.version_info[1] >= 7:
-    print "ERROR for irrtree: Sorry, only python 2.7 or higher are supported"
+    print("ERROR for irrtree: Sorry, only python 2.7 or higher are supported")
     sys.exit(1)
 
 from pip.req import parse_requirements
