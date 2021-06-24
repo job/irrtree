@@ -58,6 +58,7 @@ setup(
     url='https://github.com/job/irrtree',
     description='IRRTree',
     long_description=README,
+    long_description_content_type="text/markdown",
     license='BSD 2-Clause',
     keywords='irr python bgp routing networking',
     classifiers=[
