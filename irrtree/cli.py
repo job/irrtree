@@ -216,6 +216,8 @@ def main():
 
     connection = connect(server.irr_host, server.irr_port)
     send(connection, "!!")
+    send(connection, "!t1000")  # instruct irrd to set max timeout (1000s)
+    receive(connection)         # silently ignore result
     if server.sources_list:
         send(connection, "!s%s" % server.sources_list)
         answer = receive(connection)
@@ -295,6 +297,8 @@ def export(*data):
 
     connection = connect(server.irr_host, server.irr_port)
     send(connection, "!!")
+    send(connection, "!t1000")  # instruct irrd to set max timeout (1000s)
+    receive(connection)         # silently ignore result
     if server.sources_list:
         send(connection, "!s%s" % server.sources_list)
         answer = receive(connection)
