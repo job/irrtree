@@ -228,7 +228,7 @@ def main():
     db = {}
 
     widgets = ['Processed: ', progressbar.Counter(), ' objects (', progressbar.Timer(), ')']
-    pbar = progressbar.ProgressBar(widgets=widgets, maxval=2**32)
+    pbar = progressbar.ProgressBar(widgets=widgets, max_value=progressbar.UnknownLength)
     if not debug:
         pbar.start()
     counter = 0
@@ -274,6 +274,7 @@ def main():
             if "-" in item:
                 db[item]['members'] = db[item]['members'] - to_delete
 
+    pbar.finish()
     process(server.irr_host, server.afi, db, query_object, server.search)
 
 
