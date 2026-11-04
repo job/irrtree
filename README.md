@@ -35,8 +35,8 @@ From source:
 ```shell
 git clone https://github.com/job/irrtree.git
 cd irrtree
-pip install 'pip>1.5' --upgrade
-python setup.py install
+pip install --upgrade pip
+pip install .
 ```
 
 ## Examples
@@ -73,6 +73,7 @@ required. Run them in a virtual environment:
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
+pip install -r requirements.txt
 pip install pytest
 pip install -e .
 pytest -v

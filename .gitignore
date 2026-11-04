@@ -1,5 +1,6 @@
+build/
 .coverage
 .pytest_cache/
 __pycache__/
-/result
 .venv/
+*.egg-info/

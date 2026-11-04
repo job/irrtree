@@ -28,12 +28,7 @@
 from irrtree import __version__
 
 import codecs
-import os
 import sys
-
-if not sys.version_info[0] >= 2 and not sys.version_info[1] >= 7:
-    print("ERROR for irrtree: Sorry, only python 2.7 or higher are supported")
-    sys.exit(1)
 
 from setuptools import setup, find_packages
 from os.path import abspath, dirname, join
@@ -44,11 +39,7 @@ with codecs.open(join(here, 'README.md'), encoding='utf-8') as f:
     README = f.read()
 
 if sys.argv[-1] == 'publish':
-    os.system('python2.7 setup.py sdist upload')
-    print("You probably want to also tag the version now:")
-    print("  git tag -a %s -m 'version %s'" % (__version__, __version__))
-    print("  git push --tags")
-    sys.exit()
+    sys.exit("Use 'python -m build' and 'twine upload' instead.")
 
 setup(
     name='irrtree',
@@ -61,15 +52,20 @@ setup(
     long_description_content_type="text/markdown",
     license='BSD 2-Clause',
     keywords='irr python bgp routing networking',
+    python_requires='>=3.9',
     classifiers=[
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: System :: Networking',
-        'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
     ],
-    install_requires=['asciitree==0.3.3', 'progressbar2', 'wheel'],
-    setup_requires=['asciitree==0.3.3', 'progressbar2', 'wheel'],
+    install_requires=['asciitree>=1.0.0', 'progressbar2>=4.6.0'],
     packages=find_packages(exclude=['tests', 'tests.*']),
     entry_points={'console_scripts': ['irrtree = irrtree.cli:main']},
 )

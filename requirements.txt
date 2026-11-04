@@ -1,0 +1,2 @@
+asciitree==1.0.0
+progressbar2==4.6.0
